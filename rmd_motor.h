@@ -87,9 +87,15 @@ private:
     motor_state2 state;
     multi_angle multi;
     byte cmd[8] = {0x00,};
+    Timer tmr;
+    int16_t torque=0;
+    int32_t error =0;
+    double integral=0;
+
 
 public:
     RMDmotor(uint8_t set_id, CAN& can);
+    void PID(int32_t ref_pos, float KP, float KI);
     void torqueCL(const int16_t& torque);
     void absposCL(const uint16_t& speed_limit,const int32_t & pos);
     void read_Multi();
@@ -101,7 +107,7 @@ public:
 //    int16_t PID(int16_t ref_pos);
 
 /* return motor states(inline) */
-    inline const uint16_t getId()                     {return id;}
+    inline const uint16_t getId()                {return id;}
     inline  byte* receive_state()                {return (byte*)&state;}
     inline  byte* receive_multi()                {return (byte*)&multi;}
     inline  byte* getCMD()                       {return (byte*)&cmd;} 

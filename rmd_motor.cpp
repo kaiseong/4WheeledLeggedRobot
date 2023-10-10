@@ -20,7 +20,9 @@ byte frame_void[8]                  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 
 /* RMD method */
 RMDmotor::RMDmotor(uint8_t set_id,CAN& can) : id(0x140 | set_id),can(can)
-{   }
+{
+    tmr.start();
+}
 
 ODrive::ODrive(uint8_t id,CAN& can): node_id(id), can(can)
 {}
@@ -85,6 +87,17 @@ void RMDmotor::set_cmd(byte input_cmd[]){
 void RMDmotor::read_state2(){
     memcpy(cmd,frame_read_status2,LEN);
     return;
+}
+
+void RMDmotor::PID(int32_t ref_pos, float KP, float KI){
+    error = ref_pos - state.degree; // 1degree
+    double result_P = KP * error;  
+    integral += error * tmr.read();
+    tmr.reset();
+    double result_I = KI * integral;
+    torque = result_P + result_I;
+    torqueCL(torque);
+
 }
 
 void ODrive::velocityCL(const float& vel, const float& tor)
